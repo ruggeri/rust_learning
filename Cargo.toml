@@ -1,0 +1,8 @@
+[package]
+authors = ["Ned Ruggeri <ruggeri@self-loop.com>"]
+name = "rust_learning"
+version = "0.1.0"
+
+[lib]
+name="rust_learning"
+path="src/lib.rs"

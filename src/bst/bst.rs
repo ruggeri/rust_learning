@@ -22,6 +22,10 @@ impl<T: fmt::Debug> fmt::Debug for BST<T> {
 }
 
 impl<T: PartialOrd> BST<T> {
+  pub fn new() -> BST<T> {
+    BST::Nil
+  }
+
   pub fn insert(&mut self, t: T) -> &mut BST<T> {
     match self {
       BST::Nil => {

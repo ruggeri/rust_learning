@@ -3,7 +3,7 @@ extern crate rust_learning;
 use rust_learning::bst::BST;
 
 fn main() {
-    let mut b = BST::Nil::<i32>;
+    let mut b = BST::new();
     b.insert(50).insert(25).insert(75).insert(12).insert(95);
 
     println!("{:#?}", b);

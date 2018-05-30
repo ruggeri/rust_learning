@@ -31,9 +31,7 @@ impl<T: fmt::Debug> fmt::Debug for BST<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Nil => f.write_str("Nil"),
-            Node(node_data) => {
-                f.debug_tuple("Node").field(node_data).finish()
-            }
+            Node(node_data) => f.debug_tuple("Node").field(node_data).finish(),
         }
     }
 }
@@ -65,18 +63,10 @@ impl<T: PartialOrd> BST<T> {
 
     pub fn find(&self, t: &T) -> &BST<T> {
         match self {
-            Nil => {
-                self
-            },
-            Node(NodeData { value, left, .. }) if *t < *value => {
-                left.find(t)
-            },
-            Node(NodeData { value, .. }) if *t == *value => {
-                self
-            },
-            Node(NodeData { value, right, .. }) if *value < *t => {
-                right.find(t)
-            },
+            Nil => self,
+            Node(NodeData { value, left, .. }) if *t < *value => left.find(t),
+            Node(NodeData { value, .. }) if *t == *value => self,
+            Node(NodeData { value, right, .. }) if *value < *t => right.find(t),
             Node(_) => unreachable!(),
         }
     }
@@ -84,18 +74,10 @@ impl<T: PartialOrd> BST<T> {
     // Seriously people? I have to write _mut versions for everything?
     fn find_mut(&mut self, t: &T) -> &mut BST<T> {
         match self {
-            Nil => {
-                self
-            },
-            Node(NodeData { value, left, .. }) if *t < *value => {
-                left.find_mut(t)
-            },
-            Node(NodeData { value, .. }) if *t == *value => {
-                self
-            },
-            Node(NodeData { value, right, .. }) if *value < *t => {
-                right.find_mut(t)
-            },
+            Nil => self,
+            Node(NodeData { value, left, .. }) if *t < *value => left.find_mut(t),
+            Node(NodeData { value, .. }) if *t == *value => self,
+            Node(NodeData { value, right, .. }) if *value < *t => right.find_mut(t),
             Node(_) => unreachable!(),
         }
     }
@@ -111,7 +93,11 @@ impl<T: PartialOrd> BST<T> {
     pub fn find_max_mut(&mut self) -> &mut BST<T> {
         match self {
             Nil => self,
-            Node(NodeData { left: box Nil, right: box Nil, .. }) => self,
+            Node(NodeData {
+                left: box Nil,
+                right: box Nil,
+                ..
+            }) => self,
             Node(NodeData { right: box Nil, .. }) => self,
             Node(NodeData { right, .. }) => right.find_max_mut(),
         }
@@ -120,8 +106,12 @@ impl<T: PartialOrd> BST<T> {
     pub fn insert(&mut self, t: T) -> &mut BST<T> {
         match self.find_mut(&t) {
             l @ Nil => {
-                *l = Node(NodeData { value: t, left: box Nil, right: box Nil });
-            },
+                *l = Node(NodeData {
+                    value: t,
+                    left: box Nil,
+                    right: box Nil,
+                });
+            }
             Node(_) => {
                 // We are already inserted!
             }
@@ -133,26 +123,32 @@ impl<T: PartialOrd> BST<T> {
     // Returns the deleted value.
     fn delete(&mut self) -> Option<T> {
         match self {
-            Nil => {
-                None
-            },
-            Node(NodeData { left: box Nil, right, .. }) => {
+            Nil => None,
+            Node(NodeData {
+                left: box Nil,
+                right,
+                ..
+            }) => {
                 let mut node = right.take();
                 mem::swap(self, &mut node);
                 node.take_value()
-            },
-            Node(NodeData { left, right: box Nil, .. }) => {
+            }
+            Node(NodeData {
+                left,
+                right: box Nil,
+                ..
+            }) => {
                 let mut node = left.take();
                 mem::swap(self, &mut node);
                 node.take_value()
-            },
+            }
             Node(NodeData { value, left, .. }) => {
                 let mut prev_node = left.find_max_mut();
                 // Safe to unwrap because match ensures that left cannot be Nil.
                 let mut rv = prev_node.delete().unwrap();
                 mem::swap(value, &mut rv);
                 Some(rv)
-            },
+            }
         }
     }
 
